@@ -91,6 +91,9 @@ export default function AgentsPage() {
 
       <PhaseBanner status={run?.status ?? "queued"} />
 
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] px-2 py-0.5 rounded-full border border-sky-400/40 text-sky-400">Module 04 · Multi-Run Execution</span>
+      </div>
       <RunGrid results={run?.results ?? []} />
 
       {run?.rootCause && (

@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Wrench, Radar, Bug, Gauge, RefreshCw, ArrowRight } from "lucide-react";
+import { Wrench, Radar, Bug, Gauge, RefreshCw, ArrowRight, Layers } from "lucide-react";
 import AgentSquadCard from "@/components/AgentSquadCard";
 
 const SQUAD = [
   { icon: Radar, name: "The Simulator", quote: "I inject 1,000 synthetic users before your real ones ever see a bug.", level: "Module 01", accent: "#34e0a1" },
   { icon: Bug, name: "The Scenario Generator", quote: "50+ edge cases, ready before you even thought to test them.", level: "Module 02", accent: "#8b7cf6" },
   { icon: Wrench, name: "The Stress Tester", quote: "Prompt injections, policy traps, PII probes — I try to break you on purpose.", level: "Module 03", accent: "#f5a623" },
+  { icon: Layers, name: "The Executor", quote: "Every run, tracked live, one after another, no request left unaccounted for.", level: "Module 04", accent: "#38bdf8" },
   { icon: Gauge, name: "The Evaluator", quote: "Reliability, safety, consistency, cost. Four axes, zero guesswork.", level: "Module 05", accent: "#f4415f" },
   { icon: RefreshCw, name: "The Learner", quote: "I patch what broke and re-run it — automatically, before you deploy.", level: "Module 06", accent: "#34e0a1" },
 ];
