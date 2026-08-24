@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { PlayCircle, Loader2, Bug, ShieldAlert, Users, Cpu } from "lucide-react";
+import { PlayCircle, Loader2, Bug, ShieldAlert, Users, Cpu, Radio, RadioTower } from "lucide-react";
 import PhaseBanner from "@/components/PhaseBanner";
 import RunGrid from "@/components/RunGrid";
 import LiveConsole from "@/components/LiveConsole";
 import ScoreDonut from "@/components/ScoreDonut";
 import ScenarioCard from "@/components/ScenarioCard";
 import ToastAlert from "@/components/ToastAlert";
-import { RunState } from "@/lib/types";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
 import { ATTACK_VECTOR_COUNT } from "@/lib/scenario";
+import { useRunSocket } from "@/hooks/useRunSocket";
 
 const SCENARIOS = [
   { icon: Users, title: "1,000 Angry Users", subtitle: "Full chaos + auto-improve run", badge: "Primary" },
@@ -19,11 +21,11 @@ const SCENARIOS = [
 ];
 
 export default function AgentsPage() {
-  const [run, setRun] = useState<RunState | null>(null);
+  const [runId, setRunId] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const alertedRef = useRef(false);
+  const { run, live } = useRunSocket(runId);
 
   async function startDemo() {
     setStarting(true);
@@ -32,42 +34,28 @@ export default function AgentsPage() {
     const res = await fetch("/api/runs", { method: "POST" });
     const { id } = await res.json();
     setStarting(false);
-    poll(id);
+    setRunId(id);
   }
 
-  function poll(id: string) {
-    if (pollRef.current) clearInterval(pollRef.current);
-    pollRef.current = setInterval(async () => {
-      const res = await fetch(`/api/runs/${id}`);
-      if (!res.ok) return;
-      const data: RunState = await res.json();
-      setRun(data);
-      if (data.rootCause && !alertedRef.current) {
-        alertedRef.current = true;
-        setShowAlert(true);
-      }
-      if (data.status === "done" && pollRef.current) {
-        clearInterval(pollRef.current);
-      }
-    }, 600);
-  }
-
-  useEffect(
-    () => () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    },
-    []
-  );
+  useEffect(() => {
+    if (run?.rootCause && !alertedRef.current) {
+      alertedRef.current = true;
+      setShowAlert(true);
+    }
+  }, [run?.rootCause]);
 
   const isRunning = run && run.status !== "done";
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Agent Demo Scenarios</h1>
-        <p className="text-muted mt-1">
-          {ATTACK_VECTOR_COUNT}+ adversarial attack vectors, run against your agent in one pass.
-        </p>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Agent Demo Scenarios</h1>
+          <p className="text-muted mt-1">{ATTACK_VECTOR_COUNT}+ adversarial attack vectors, run against your agent in one pass.</p>
+        </div>
+        <Badge tone={live ? "mint" : "muted"} icon={live ? RadioTower : Radio}>
+          {live ? "Live · Socket.IO connected" : "Polling fallback"}
+        </Badge>
       </div>
 
       <div className="grid lg:grid-cols-[340px_1fr] gap-6">
@@ -76,14 +64,10 @@ export default function AgentsPage() {
           {SCENARIOS.map((s, i) => (
             <ScenarioCard key={s.title} {...s} active={i === 0} />
           ))}
-          <button
-            onClick={startDemo}
-            disabled={starting || !!isRunning}
-            className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-mint text-black font-medium px-6 py-3 disabled:opacity-50 hover:opacity-90 transition-opacity"
-          >
+          <Button onClick={startDemo} disabled={starting || !!isRunning} className="mt-2">
             {starting || isRunning ? <Loader2 size={18} className="animate-spin" /> : <PlayCircle size={18} />}
             {isRunning ? "Running..." : "Run Demo"}
-          </button>
+          </Button>
         </div>
 
         <LiveConsole log={run?.log ?? []} />
@@ -91,9 +75,7 @@ export default function AgentsPage() {
 
       <PhaseBanner status={run?.status ?? "queued"} />
 
-      <div className="flex items-center gap-2">
-        <span className="text-[11px] px-2 py-0.5 rounded-full border border-sky-400/40 text-sky-400">Module 04 · Multi-Run Execution</span>
-      </div>
+      <Badge tone="sky">Module 04 · Multi-Run Execution</Badge>
       <RunGrid results={run?.results ?? []} />
 
       {run?.rootCause && (
@@ -106,9 +88,7 @@ export default function AgentsPage() {
 
       {run?.scoresBefore && (
         <div>
-          <h3 className="text-sm font-medium text-muted mb-3">
-            {run.scoresAfter ? "Before → after auto-improve" : "Live scores"}
-          </h3>
+          <h3 className="text-sm font-medium text-muted mb-3">{run.scoresAfter ? "Before → after auto-improve" : "Live scores"}</h3>
           <div className="grid sm:grid-cols-3 gap-4">
             <ScoreCompare label="Reliability" color="#8b7cf6" before={run.scoresBefore.reliability} after={run.scoresAfter?.reliability} />
             <ScoreCompare label="Safety" color="#34e0a1" before={run.scoresBefore.safety} after={run.scoresAfter?.safety} />

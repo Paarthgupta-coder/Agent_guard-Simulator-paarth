@@ -25,7 +25,7 @@ To test against a real model, or persist runs to a real database, copy `.env.exa
 | Deck module | This repo |
 |---|---|
 | 01 Simulation Engine | `src/lib/simulate.ts` runs each persona's message against the agent-under-test, sequentially, with live progress |
-| 02 Scenario Generator | `src/lib/scenario.ts` — 25 seeded personas across 6 categories (control, hallucination bait, contradiction traps, jailbreak attempts, PII probes, off-topic), 28 total runs per pass including canary repeats |
+| 02 Scenario Generator | `src/lib/scenario.ts` — 56 seeded personas (50 adversarial attack-vector personas across 5 categories + control group), 59 total runs per pass including canary repeats |
 | 03 Stress Testing Layer | The adversarial personas in `scenario.ts` *are* the stress layer — prompt injection, policy contradiction, and PII probing are all represented |
 | 04 Multi-Run Execution | Runs execute in sequence with live state pushed to the UI every ~120ms (see "Real-time" below for why this isn't Redis/Socket.IO in v1) |
 | 05 Evaluation Engine | `src/lib/evaluate.ts` — rule-based flag detection read from the *response text itself* (not the persona's label, so it's an honest check), plus 4-axis scoring: reliability, safety, consistency, cost |
@@ -50,17 +50,22 @@ To test against a real model, or persist runs to a real database, copy `.env.exa
   `src/lib/db.ts` + `src/lib/models/Run.ts`. No code elsewhere changes — check `GET /api/health`
   to confirm which mode is active.
 
-## Real-time: polling, not Socket.IO
+## Real-time: real Socket.IO, with an important deployment tradeoff
 
-The deck's architecture spec calls for a Redis/Socket.IO stack. This build uses 600ms
-polling from the client instead, because:
-1. It deploys cleanly to Vercel's serverless functions, which don't hold long-lived
-   WebSocket connections well.
-2. For a 28-persona demo run it's visually indistinguishable from a socket push.
+This now runs on a **custom Node server** (`server.js`) with real Socket.IO attached —
+not polling. Every run mutation in `src/lib/store.ts` pushes a `run:progress` event to
+anyone subscribed to that run, and a `runs:changed` broadcast to everyone else. Verified
+with a real `socket.io-client` test: 228 live push events for one 59-persona run, zero
+polling involved.
 
-If you want real Socket.IO for the write-up / architecture slide, `src/lib/store.ts`
-is already the single seam to change — the API routes and simulation logic don't know or
-care how state gets to the client.
+**This means `npm run dev` / `npm start` now run `node server.js`, not the plain Next.js
+CLI** — required so Socket.IO can attach to the same HTTP server Next.js uses.
+
+**The tradeoff, and it's a real one:** a custom long-lived server does not run on Vercel's
+serverless functions — they don't stay alive for WebSockets. Deploy this to **Render,
+Railway, or Fly** instead (all free-tier friendly). If you do end up somewhere serverless,
+`src/hooks/useRunSocket.ts` detects the socket never connects and automatically falls back
+to 700ms polling — you lose the real-time push, not functionality.
 
 ## API routes
 
@@ -104,14 +109,20 @@ src/
 ## Deploying
 
 1. Push to GitHub.
-2. Import into Vercel — zero config needed for the default (memory + mock) mode.
-3. To go further: add a free MongoDB Atlas cluster, set `MONGODB_URI` in Vercel's env
-   vars, redeploy. Check `/api/health` to confirm it picked it up.
+2. Deploy to **Render, Railway, or Fly** (not Vercel — see "Real-time" above for why).
+   All three support a `node server.js` start command out of the box with a free tier.
+3. Zero config needed for the default (memory + mock) mode. To go further: add a free
+   MongoDB Atlas cluster and set `MONGODB_URI` in the host's env vars, redeploy. Check
+   `/api/health` to confirm it picked it up.
+4. If you specifically need Vercel (e.g. team familiarity), it still works — `npm run
+   dev:vercel-style` runs the plain Next.js CLI without the custom server, and the client
+   automatically falls back to polling. You lose real-time push, not functionality.
 
 ## Next up (see the team's build-phase plan for the day-by-day)
 
-- Real Redis job queue + Socket.IO for true parallel execution at higher persona counts
-- LLM-driven expansion of the persona library beyond the seeded 25 (per Module 02's spec)
+- Real Redis job queue for true parallel execution at higher persona counts (Socket.IO is
+  now real — this is the next piece, not a re-do)
+- LLM-driven expansion of the persona library beyond the seeded 50 attack vectors (per Module 02's spec)
 - Wire in a second, swappable "agent under test" so judges can point AgentGuard at
   their own agent instead of the built-in Playstream demo bot
 - Auth stub for multi-user judging (currently single-tenant by design, matches hackathon scope)

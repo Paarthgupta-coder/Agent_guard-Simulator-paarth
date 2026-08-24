@@ -1,6 +1,7 @@
 import { LogLine, RunState } from "./types";
 import { getDb, isDbConfigured } from "./db";
 import { RunModel } from "./models/Run";
+import { emitRunProgress, emitRunsChanged } from "./socket";
 
 /**
  * Dual-mode run store:
@@ -49,9 +50,11 @@ export async function createRun(id: string, totalPersonas: number): Promise<RunS
   if (isDbConfigured) {
     await getDb();
     await RunModel.create({ _id: id, ...run });
-    return run;
+  } else {
+    memory.set(id, run);
   }
-  memory.set(id, run);
+  emitRunsChanged();
+  emitRunProgress(id, run);
   return run;
 }
 
@@ -77,10 +80,15 @@ export async function updateRun(id: string, patch: Partial<RunState>): Promise<v
   if (isDbConfigured) {
     await getDb();
     await RunModel.findByIdAndUpdate(id, { $set: patch });
-    return;
+  } else {
+    const run = memory.get(id);
+    if (run) Object.assign(run, patch);
   }
-  const run = memory.get(id);
-  if (run) Object.assign(run, patch);
+  const updated = await getRun(id);
+  if (updated) {
+    emitRunProgress(id, updated);
+    if (patch.status === "done") emitRunsChanged();
+  }
 }
 
 export async function appendLog(id: string, text: string, level: LogLine["level"] = "info"): Promise<void> {
@@ -88,10 +96,12 @@ export async function appendLog(id: string, text: string, level: LogLine["level"
   if (isDbConfigured) {
     await getDb();
     await RunModel.findByIdAndUpdate(id, { $push: { log: entry } });
-    return;
+  } else {
+    const run = memory.get(id);
+    if (run) run.log.push(entry);
   }
-  const run = memory.get(id);
-  if (run) run.log.push(entry);
+  const updated = await getRun(id);
+  if (updated) emitRunProgress(id, updated);
 }
 
 export async function storeMode(): Promise<"mongodb" | "memory"> {

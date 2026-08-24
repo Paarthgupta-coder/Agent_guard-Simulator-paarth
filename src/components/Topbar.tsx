@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MessageSquare, Bell, Moon, Radar } from "lucide-react";
+import { MessageSquare, Bell, Moon, Radar, Database, Cpu } from "lucide-react";
 import clsx from "clsx";
+import Badge from "./ui/Badge";
 
 const TABS = [
   { href: "/dashboard", label: "Home" },
@@ -12,23 +14,49 @@ const TABS = [
   { href: "/dashboard/notifications", label: "Notifications" },
 ];
 
+interface Health {
+  storage: "mongodb" | "memory";
+  agentMode: "live-model" | "mock-agent";
+}
+
 export default function Topbar() {
   const pathname = usePathname();
+  const [health, setHealth] = useState<Health | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => !cancelled && setHealth(d))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="border-b border-border">
       <div className="px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="text-lg font-semibold">
             Welcome, <span className="text-mint">Team Rocket</span>
           </span>
+          {health && (
+            <div className="hidden lg:flex items-center gap-2">
+              <Badge tone={health.storage === "mongodb" ? "mint" : "muted"} icon={Database}>
+                {health.storage === "mongodb" ? "MongoDB" : "In-memory"}
+              </Badge>
+              <Badge tone={health.agentMode === "live-model" ? "violet" : "muted"} icon={Cpu}>
+                {health.agentMode === "live-model" ? "Live model" : "Mock agent"}
+              </Badge>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3 text-muted">
           <MessageSquare size={18} className="hover:text-foreground transition-colors cursor-pointer" />
           <Bell size={18} className="hover:text-foreground transition-colors cursor-pointer" />
           <Moon size={18} className="hover:text-foreground transition-colors cursor-pointer" />
-          <div className="w-8 h-8 rounded-full bg-mint/20 text-mint flex items-center justify-center text-xs font-semibold">
-            TR
-          </div>
+          <div className="w-8 h-8 rounded-full bg-mint/20 text-mint flex items-center justify-center text-xs font-semibold">TR</div>
         </div>
       </div>
       <div className="px-6 pb-3">
@@ -40,7 +68,7 @@ export default function Topbar() {
                 key={tab.href}
                 href={tab.href}
                 className={clsx(
-                  "px-4 py-1.5 rounded-full text-sm transition-colors",
+                  "px-4 py-1.5 rounded-full text-sm transition-all duration-150",
                   active ? "bg-mint text-black font-medium" : "text-muted hover:text-foreground"
                 )}
               >

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Wrench, Radar, Bug, Gauge, RefreshCw, ArrowRight, Layers } from "lucide-react";
 import AgentSquadCard from "@/components/AgentSquadCard";
+import { buttonClasses } from "@/components/ui/Button";
 
 const SQUAD = [
   { icon: Radar, name: "The Simulator", quote: "I inject 1,000 synthetic users before your real ones ever see a bug.", level: "Module 01", accent: "#34e0a1" },
@@ -19,30 +20,27 @@ export default function Home() {
           <Radar size={20} className="text-mint" />
           Agent<span className="text-mint">Guard</span>
         </div>
-        <Link href="/dashboard" className="text-sm rounded-full bg-mint text-black font-medium px-4 py-2 hover:opacity-90 transition-opacity">
+        <Link href="/dashboard" className={buttonClasses("primary", "sm")}>
           Open Dashboard
         </Link>
       </header>
 
-      <section className="mx-auto max-w-5xl px-6 pt-20 pb-16 text-center">
+      <section className="relative mx-auto max-w-5xl px-6 pt-24 pb-16 text-center bg-grid">
         <span className="inline-block text-xs tracking-widest text-mint border border-mint/30 rounded-full px-3 py-1 mb-6">
           THE RELIABILITY LAYER FOR THE AGENT ECONOMY
         </span>
-        <h1 className="text-5xl md:text-6xl font-semibold tracking-tight leading-tight">
-          Your agents. <span className="text-mint">Battle-tested.</span>
+        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05]">
+          Your agents. <span className="text-gradient">Battle-tested.</span>
         </h1>
-        <p className="text-muted text-lg mt-6 max-w-2xl mx-auto">
-          AgentGuard runs your AI agent against 1,000 synthetic angry users, adversarial prompts, and
+        <p className="text-muted text-lg mt-6 max-w-2xl mx-auto leading-relaxed">
+          AgentGuard runs your AI agent against synthetic angry users, adversarial prompts, and
           edge cases — then finds the root cause and auto-patches it, before a real customer ever hits it.
         </p>
-        <div className="flex items-center justify-center gap-3 mt-8">
-          <Link
-            href="/dashboard/agents"
-            className="rounded-full bg-mint text-black font-medium px-6 py-3 flex items-center gap-2 hover:opacity-90 transition-opacity"
-          >
+        <div className="flex items-center justify-center gap-3 mt-9">
+          <Link href="/dashboard/agents" className={buttonClasses("primary", "lg", "gap-2")}>
             Run the demo <ArrowRight size={16} />
           </Link>
-          <Link href="/dashboard" className="rounded-full border border-border px-6 py-3 text-foreground/90 hover:bg-white/5 transition-colors">
+          <Link href="/dashboard" className={buttonClasses("secondary", "lg")}>
             View dashboard
           </Link>
         </div>

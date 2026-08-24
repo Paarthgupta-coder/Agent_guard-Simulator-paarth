@@ -24,17 +24,45 @@
   --color-rose: var(--rose);
   --color-violet: var(--violet);
   --color-border: var(--border);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  /*
+   * Deliberately a system font stack, not next/font/google — that pulls
+   * from Google Fonts at BUILD time with no fallback if the request fails,
+   * which is a real risk on hackathon wifi. This stack (San Francisco on
+   * Mac, Segoe UI on Windows, Inter/Roboto on most Linux/Android setups)
+   * looks premium with zero network dependency, ever.
+   */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01", "tnum";
+  text-rendering: optimizeLegibility;
   background-image:
     radial-gradient(circle at 15% 0%, rgba(52, 224, 161, 0.08), transparent 40%),
     radial-gradient(circle at 85% 20%, rgba(139, 124, 246, 0.06), transparent 35%);
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, var(--mint), #7ef0c8 40%, var(--violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .glass {

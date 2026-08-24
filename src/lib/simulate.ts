@@ -27,7 +27,7 @@ export async function runDemoPipeline(runId: string) {
       `${persona.name} (${persona.mood}) → ${result.passed ? "OK" : `FLAGGED: ${result.flags.join(", ")}`}`,
       result.passed ? "info" : "warn"
     );
-    await sleep(120); // pacing for the live feed
+    await sleep(70); // pacing for the live feed
   }
 
   // --- Module 05: Evaluation Engine ---
@@ -75,7 +75,7 @@ export async function runDemoPipeline(runId: string) {
         `Re-run ${failed.persona.name} → ${result.passed ? "FIXED" : "still failing"}`,
         result.passed ? "success" : "error"
       );
-      await sleep(120);
+      await sleep(70);
     }
 
     const mergedResults = results.map((r) => {

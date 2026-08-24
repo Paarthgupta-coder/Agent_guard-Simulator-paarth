@@ -1,5 +1,7 @@
 import { PersonaResult } from "@/lib/types";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
+import { Card } from "./ui/Card";
+import Badge from "./ui/Badge";
 
 const CATEGORY_LABEL: Record<string, string> = {
   CONTROL: "Routine Request",
@@ -12,26 +14,24 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 export default function DecisionCard({ result, index }: { result: PersonaResult; index: number }) {
   const severity = result.passed ? "LOW" : result.flags.length > 1 ? "HIGH" : "MEDIUM";
-  const severityColor = result.passed ? "text-mint border-mint/40" : severity === "HIGH" ? "text-rose border-rose/40" : "text-amber border-amber/40";
+  const severityTone = result.passed ? "mint" : severity === "HIGH" ? "rose" : "amber";
 
   return (
-    <div className="glass rounded-2xl p-5 rise-in">
+    <Card className="rise-in hover:border-white/20 transition-colors">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          {result.passed ? <ShieldCheck size={18} className="text-mint" /> : <ShieldAlert size={18} className="text-rose" />}
+          {result.passed ? <ShieldCheck size={18} className="text-mint shrink-0" /> : <ShieldAlert size={18} className="text-rose shrink-0" />}
           <div>
-            <div className="font-medium text-foreground">
+            <div className="font-medium text-foreground flex items-center gap-2 flex-wrap">
               RUN_{String(index + 1).padStart(6, "0")}
-              <span className={`ml-2 text-[11px] px-2 py-0.5 rounded-full border ${severityColor}`}>{severity}</span>
+              <Badge tone={severityTone}>{severity}</Badge>
             </div>
-            <div className="text-xs text-muted">
+            <div className="text-xs text-muted mt-0.5">
               {CATEGORY_LABEL[result.persona.category] ?? result.persona.category} · {result.persona.name} · {result.mocked ? "mock agent" : "live model"}
             </div>
           </div>
         </div>
-        <span className={`text-xs font-medium ${result.passed ? "text-mint" : "text-rose"}`}>
-          {result.passed ? "Passed" : "Flagged"}
-        </span>
+        <span className={`text-xs font-medium shrink-0 ${result.passed ? "text-mint" : "text-rose"}`}>{result.passed ? "Passed" : "Flagged"}</span>
       </div>
 
       <p className="text-sm text-foreground/80 mb-4 line-clamp-2">&ldquo;{result.response}&rdquo;</p>
@@ -47,9 +47,9 @@ export default function DecisionCard({ result, index }: { result: PersonaResult;
           <ShieldCheck size={14} className="text-mint" />
           Test Trace
         </div>
-        <span className="text-[11px] px-2 py-0.5 rounded-full border border-mint/30 text-mint">Verified</span>
+        <Badge tone="mint">Verified</Badge>
       </div>
-    </div>
+    </Card>
   );
 }
 

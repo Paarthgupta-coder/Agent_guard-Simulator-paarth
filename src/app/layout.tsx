@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AgentGuard — Agent Flight Simulator",
-  description: "The reliability layer for the agent economy. Test AI agents against 1,000 synthetic users before they touch a real customer.",
+  description:
+    "The reliability layer for the agent economy. Test AI agents against synthetic users, adversarial prompts, and edge cases before they touch a real customer.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, AlertTriangle, XCircle, CheckCircle2, Info } from "lucide-react";
-import { RunState, LogLine } from "@/lib/types";
+import { ArrowRight, AlertTriangle, XCircle, CheckCircle2, Info, BellOff } from "lucide-react";
+import { LogLine } from "@/lib/types";
+import { SectionHeader, EmptyState, Card } from "@/components/ui/Card";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { buttonClasses } from "@/components/ui/Button";
+import { useRunsList } from "@/hooks/useRunSocket";
 
 const ICON: Record<LogLine["level"], typeof Info> = {
   info: Info,
@@ -19,44 +22,40 @@ const COLOR: Record<LogLine["level"], string> = {
 };
 
 export default function NotificationsPage() {
-  const [runs, setRuns] = useState<RunState[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const res = await fetch("/api/runs");
-      const data = await res.json();
-      if (!cancelled) setRuns(data.runs ?? []);
-    }
-    load();
-    const interval = setInterval(load, 2000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
-
-  const latest = runs[0];
+  const runs = useRunsList();
+  const loading = runs === undefined;
+  const latest = runs?.[0];
   const notifications = latest ? [...latest.log].filter((l) => l.level !== "info").reverse() : [];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Live Notifications</h1>
-        <p className="text-muted mt-1">Failures, patches, and recoveries surfaced as they happen.</p>
-      </div>
+      <SectionHeader title="Live Notifications" subtitle="Failures, patches, and recoveries surfaced as they happen." />
 
-      {!latest && (
-        <div className="glass rounded-2xl p-10 text-center">
-          <p className="text-muted mb-4">Waiting for agent activity...</p>
-          <Link href="/dashboard/agents" className="inline-flex items-center gap-2 rounded-full bg-mint text-black font-medium px-5 py-2.5">
-            Run Demo <ArrowRight size={16} />
-          </Link>
-        </div>
+      {loading && (
+        <Card className="divide-y divide-border p-0">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="p-4 flex items-center gap-3">
+              <Skeleton className="w-5 h-5 rounded-full shrink-0" />
+              <Skeleton className="h-4 flex-1" />
+            </div>
+          ))}
+        </Card>
+      )}
+
+      {!loading && !latest && (
+        <EmptyState
+          icon={BellOff}
+          message="Waiting for agent activity..."
+          action={
+            <Link href="/dashboard/agents" className={buttonClasses("primary", "md", "gap-2")}>
+              Run Demo <ArrowRight size={16} />
+            </Link>
+          }
+        />
       )}
 
       {latest && (
-        <div className="glass rounded-2xl divide-y divide-border">
+        <Card className="divide-y divide-border p-0">
           {notifications.length === 0 && <div className="p-6 text-sm text-muted">No warnings or failures in the latest run.</div>}
           {notifications.map((n, i) => {
             const Icon = ICON[n.level];
@@ -70,7 +69,7 @@ export default function NotificationsPage() {
               </div>
             );
           })}
-        </div>
+        </Card>
       )}
     </div>
   );

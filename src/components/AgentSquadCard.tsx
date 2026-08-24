@@ -10,7 +10,7 @@ interface Props {
 
 export default function AgentSquadCard({ icon: Icon, name, quote, level, accent }: Props) {
   return (
-    <div className="glass rounded-2xl p-5 flex flex-col gap-4 hover:glow-mint transition-shadow">
+    <div className="glass rounded-2xl p-5 flex flex-col gap-4 hover:glow-mint hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex items-center justify-between">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center"
