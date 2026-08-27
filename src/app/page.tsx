@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Wrench, Radar, Bug, Gauge, RefreshCw, ArrowRight, Layers, ShieldCheck } from "lucide-react";
 import AgentSquadCard from "@/components/AgentSquadCard";
 import { buttonClasses } from "@/components/ui/Button";
@@ -21,68 +24,84 @@ const SQUAD = [
 export default function Home() {
   return (
     <main className="min-h-screen">
-      <header className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between sticky top-0 z-30 bg-background/80 backdrop-blur border-b border-border">
-        <div className="flex items-center gap-2 font-semibold tracking-tight">
-          <Radar size={20} className="text-mint" />
-          Agent<span className="text-mint">Guard</span>
-        </div>
-        <nav className="hidden sm:flex items-center gap-6 text-sm text-muted">
-          <a href="#pipeline" className="hover:text-foreground transition-colors">Pipeline</a>
-          <a href="#squad" className="hover:text-foreground transition-colors">Test Squad</a>
-          <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
-        </nav>
-        <div className="flex items-center gap-3">
-          <Link href="/contact" className="hidden sm:block text-sm text-muted hover:text-foreground transition-colors">
-            Contact
-          </Link>
-          <Link href="/dashboard" className={buttonClasses("primary", "sm")}>
-            Open Dashboard
-          </Link>
-        </div>
-      </header>
+      <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-6">
+        <header className="w-full max-w-4xl h-14 flex items-center justify-between bg-black/90 backdrop-blur-md border border-white/10 rounded-full px-6 shadow-2xl">
+          <div className="flex items-center gap-2 font-semibold tracking-tight text-white">
+            Agent<span className="text-mint">Guard</span>
+          </div>
+          <nav className="hidden sm:flex items-center gap-8 text-[13px] font-medium text-white/70">
+            <a href="#home" className="hover:text-white transition-colors">Home</a>
+            <a href="#pipeline" className="hover:text-white transition-colors">Features</a>
+            <a href="#squad" className="hover:text-white transition-colors">Pricing</a>
+          </nav>
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="hidden sm:block text-[13px] font-medium text-white/70 hover:text-white transition-colors">
+              Sign In
+            </Link>
+            <Link href="/dashboard" className="text-[13px] rounded-full border border-white/20 bg-transparent text-white font-medium px-4 py-1.5 hover:bg-white/10 transition-colors">
+              Sign Up
+            </Link>
+          </div>
+        </header>
+      </div>
 
       {/* Hero */}
-      <section className="relative mx-auto max-w-5xl px-6 pt-24 pb-20 text-center bg-grid">
-        <span className="inline-block text-xs tracking-widest text-mint border border-mint/30 rounded-full px-3 py-1 mb-6">
-          THE RELIABILITY LAYER FOR THE AGENT ECONOMY
-        </span>
-        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05]">
-          Your agents. <span className="text-gradient">Battle-tested.</span>
+      <motion.section 
+        initial={{ opacity: 0, y: 30 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative mx-auto max-w-5xl px-6 pt-40 pb-20 flex flex-col items-center text-center">
+        <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-[1.0]">
+          Power Up Your Agents With Smart, <br/>
+          <span className="text-mint">CLEAN TESTING</span>
         </h1>
-        <p className="text-muted text-lg mt-6 max-w-2xl mx-auto leading-relaxed">
-          AgentGuard runs your AI agent against synthetic angry users, adversarial prompts, and
-          edge cases — then finds the root cause and auto-patches it, before a real customer ever hits it.
+        <p className="text-muted text-lg md:text-xl mt-6 max-w-3xl mx-auto leading-relaxed">
+          Experience the future of AI testing—faster, safer, and sustainably powered. Built for everyday convenience and engineered for tomorrow's reliability.
         </p>
-        <div className="flex items-center justify-center gap-3 mt-9">
-          <Link href="/dashboard/agents" className={buttonClasses("primary", "lg", "gap-2")}>
-            Run the demo <ArrowRight size={16} />
+        
+        <div className="flex flex-col sm:flex-row items-center gap-6 mt-10">
+          <Link href="/dashboard/agents" className="rounded-full bg-mint hover:bg-mint-dim text-black font-semibold px-8 py-4 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(74,222,128,0.4)]">
+            Get Started <ArrowRight size={18} />
           </Link>
-          <Link href="/dashboard" className={buttonClasses("secondary", "lg")}>
-            View dashboard
-          </Link>
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-3">
+              <img className="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=1" alt="User 1" />
+              <img className="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=2" alt="User 2" />
+              <img className="w-10 h-10 rounded-full border-2 border-black" src="https://i.pravatar.cc/100?img=3" alt="User 3" />
+            </div>
+            <span className="text-sm text-muted">Trusted by 30,000+ worldwide users</span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-center gap-10 mt-14 flex-wrap">
-          <Stat value={50} suffix="+" label="attack vectors" />
-          <Stat value={6} suffix="" label="pipeline modules" />
-          <Stat value={4} suffix="" label="scoring axes" />
+        <div className="w-full mt-20 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black z-10 bottom-0 h-40" />
+          <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=2000&auto=format&fit=crop" alt="Hero Visualization" className="w-full h-[500px] object-cover rounded-3xl opacity-70 border border-white/5" />
         </div>
-      </section>
+      </motion.section>
 
       <TrustMarquee />
 
       {/* Bento overview */}
-      <section id="pipeline" className="mx-auto max-w-6xl px-6 py-24">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }}
+        id="pipeline" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center mb-12">
           <span className="text-xs tracking-widest text-mint uppercase">What's actually running</span>
           <h2 className="text-3xl font-semibold mt-2">Not a mockup. A working pipeline.</h2>
           <p className="text-muted mt-2 max-w-xl mx-auto">Every number below is produced by real code — you can verify it live on the dashboard.</p>
         </div>
         <BentoGrid />
-      </section>
+      </motion.section>
 
       {/* Alternating feature rows */}
-      <section className="mx-auto max-w-6xl px-6 py-16 space-y-28">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }} className="mx-auto max-w-6xl px-6 py-16 space-y-28">
         <FeatureRow
           title="Zero-setup testing"
           visual={<LightStreakPanel accent="#34e0a1" />}
@@ -116,10 +135,14 @@ export default function Home() {
             </>
           }
         />
-      </section>
+      </motion.section>
 
       {/* Squad */}
-      <section id="squad" className="mx-auto max-w-6xl px-6 py-24">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }} id="squad" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center mb-10">
           <span className="text-xs tracking-widest text-mint">COMMAND CHAIN INITIALIZED</span>
           <h2 className="text-3xl font-semibold mt-2">Meet The Test Squad</h2>
@@ -130,10 +153,14 @@ export default function Home() {
             <AgentSquadCard key={s.name} {...s} />
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA band */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
+      <motion.section 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8 }} className="mx-auto max-w-5xl px-6 pb-24">
         <div className="glass rounded-3xl p-12 text-center glow-mint">
           <ShieldCheck size={28} className="text-mint mx-auto mb-4" />
           <h2 className="text-2xl font-semibold mb-3">See it certify an agent, live.</h2>
@@ -142,7 +169,7 @@ export default function Home() {
             Run the demo <ArrowRight size={16} />
           </Link>
         </div>
-      </section>
+      </motion.section>
 
       <Footer />
     </main>
