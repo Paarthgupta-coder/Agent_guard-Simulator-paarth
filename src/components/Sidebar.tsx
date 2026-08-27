@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, Home, Users, ShieldCheck, Bell, LogOut, Sparkles } from "lucide-react";
+import { Zap, Home, Users, ShieldCheck, Bell, LogOut, Sparkles, Mail } from "lucide-react";
 import clsx from "clsx";
 
 const ITEMS = [
@@ -18,7 +18,7 @@ export default function Sidebar() {
     <aside className="hidden md:flex flex-col items-center w-16 shrink-0 border-r border-border bg-surface/60 py-4 gap-6">
       <Link
         href="/"
-        className="w-10 h-10 rounded-xl bg-mint/15 text-mint flex items-center justify-center hover:bg-mint/25 transition-colors"
+        className="w-10 h-10 rounded-xl bg-mint/15 text-mint flex items-center justify-center hover:bg-mint/25 transition-all duration-150"
         title="AgentGuard home"
       >
         <Zap size={20} />
@@ -33,7 +33,7 @@ export default function Sidebar() {
               href={href}
               title={label}
               className={clsx(
-                "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150",
                 active ? "bg-mint/15 text-mint" : "text-muted hover:text-foreground hover:bg-white/5"
               )}
             >
@@ -46,11 +46,14 @@ export default function Sidebar() {
       <Link
         href="/dashboard/agents"
         title="Run demo"
-        className="w-10 h-10 rounded-xl flex items-center justify-center text-violet hover:bg-white/5 transition-colors"
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-violet hover:bg-white/5 transition-all duration-150"
       >
         <Sparkles size={18} />
       </Link>
-      <Link href="/" title="Exit dashboard" className="w-10 h-10 rounded-xl flex items-center justify-center text-muted hover:text-rose hover:bg-white/5 transition-colors">
+      <Link href="/contact" title="Contact" className="w-10 h-10 rounded-xl flex items-center justify-center text-muted hover:text-foreground hover:bg-white/5 transition-all duration-150">
+        <Mail size={18} />
+      </Link>
+      <Link href="/" title="Exit dashboard" className="w-10 h-10 rounded-xl flex items-center justify-center text-muted hover:text-rose hover:bg-white/5 transition-all duration-150">
         <LogOut size={18} />
       </Link>
     </aside>

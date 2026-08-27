@@ -57,8 +57,8 @@ export default function DashboardOverview() {
           <div>
             <h3 className="text-sm font-medium text-muted mb-3">Decision Overview</h3>
             <div className="grid sm:grid-cols-3 gap-4">
-              <ScoreDonut label="Reliability" value={scores?.reliability ?? 0} color="#8b7cf6" sublabel="policy adherence" />
-              <ScoreDonut label="Consistency" value={scores?.consistency ?? 0} color="#f5a623" sublabel="repeat-answer stability" />
+              <ScoreDonut label="Reliability" value={scores?.reliability ?? 0} color="#8b7cf6" sublabel="policy adherence" icon={Brain} trend={reliabilityTrend} />
+              <ScoreDonut label="Consistency" value={scores?.consistency ?? 0} color="#f5a623" sublabel="repeat-answer stability" icon={Activity} />
               <Card className="flex flex-col items-center justify-center gap-2">
                 <span className="text-3xl font-semibold text-foreground">₹{scores?.costPerRunInr ?? 0}</span>
                 <span className="text-sm text-foreground">Cost / run</span>

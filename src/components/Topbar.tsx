@@ -53,7 +53,9 @@ export default function Topbar() {
           )}
         </div>
         <div className="flex items-center gap-3 text-muted">
-          <MessageSquare size={18} className="hover:text-foreground transition-colors cursor-pointer" />
+          <Link href="/contact" title="Contact" className="hover:text-foreground transition-colors">
+            <MessageSquare size={18} />
+          </Link>
           <Bell size={18} className="hover:text-foreground transition-colors cursor-pointer" />
           <Moon size={18} className="hover:text-foreground transition-colors cursor-pointer" />
           <div className="w-8 h-8 rounded-full bg-mint/20 text-mint flex items-center justify-center text-xs font-semibold">TR</div>

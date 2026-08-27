@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PlayCircle, Loader2, Bug, ShieldAlert, Users, Cpu, Radio, RadioTower } from "lucide-react";
-import PhaseBanner from "@/components/PhaseBanner";
+import PipelineFlow from "@/components/PipelineFlow";
 import RunGrid from "@/components/RunGrid";
 import LiveConsole from "@/components/LiveConsole";
 import ScoreDonut from "@/components/ScoreDonut";
@@ -73,7 +73,7 @@ export default function AgentsPage() {
         <LiveConsole log={run?.log ?? []} />
       </div>
 
-      <PhaseBanner status={run?.status ?? "queued"} />
+      <PipelineFlow status={run?.status ?? "queued"} />
 
       <Badge tone="sky">Module 04 · Multi-Run Execution</Badge>
       <RunGrid results={run?.results ?? []} />
