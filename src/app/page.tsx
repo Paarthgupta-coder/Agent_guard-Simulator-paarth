@@ -29,9 +29,35 @@ export default function Home() {
           <div className="flex items-center gap-2 font-semibold tracking-tight text-white">
             Agent<span className="text-mint">Guard</span>
           </div>
-          <nav className="hidden sm:flex items-center gap-8 text-[13px] font-medium text-white/70">
+          <nav className="hidden sm:flex items-center gap-8 text-[13px] font-medium text-white/70 h-full">
             <a href="#home" className="hover:text-white transition-colors">Home</a>
-            <a href="#pipeline" className="hover:text-white transition-colors">Features</a>
+            
+            <div className="relative group h-full flex items-center">
+              <a href="#pipeline" className="hover:text-white transition-colors cursor-pointer">Features</a>
+              
+              {/* Megamenu Dropdown */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top scale-95 group-hover:scale-100">
+                 <div className="w-[540px] bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-[0_20px_40px_rgba(0,0,0,0.8)] grid grid-cols-2 gap-4">
+                    <Link href="/dashboard" className="group/item flex flex-col p-4 rounded-2xl hover:bg-white/5 transition-colors">
+                      <div className="font-semibold text-white text-sm mb-1 group-hover/item:text-mint transition-colors">Dashboard</div>
+                      <div className="text-[13px] text-white/50 leading-relaxed">Real-time station monitoring</div>
+                    </Link>
+                    <Link href="/contact" className="group/item flex flex-col p-4 rounded-2xl hover:bg-white/5 transition-colors">
+                      <div className="font-semibold text-white text-sm mb-1 group-hover/item:text-mint transition-colors">Contact Us</div>
+                      <div className="text-[13px] text-white/50 leading-relaxed">Get in touch with support</div>
+                    </Link>
+                    <Link href="/#squad" className="group/item flex flex-col p-4 rounded-2xl hover:bg-white/5 transition-colors">
+                      <div className="font-semibold text-white text-sm mb-1 group-hover/item:text-mint transition-colors">About Us</div>
+                      <div className="text-[13px] text-white/50 leading-relaxed">Meet the Agent Squad</div>
+                    </Link>
+                    <Link href="#" className="group/item flex flex-col p-4 rounded-2xl hover:bg-white/5 transition-colors">
+                      <div className="font-semibold text-white text-sm mb-1 group-hover/item:text-mint transition-colors">Download App</div>
+                      <div className="text-[13px] text-white/50 leading-relaxed">Get the driver app</div>
+                    </Link>
+                 </div>
+              </div>
+            </div>
+
             <a href="#squad" className="hover:text-white transition-colors">Pricing</a>
           </nav>
           <div className="flex items-center gap-4">
