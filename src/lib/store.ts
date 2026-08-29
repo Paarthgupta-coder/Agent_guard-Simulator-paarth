@@ -107,3 +107,30 @@ export async function appendLog(id: string, text: string, level: LogLine["level"
 export async function storeMode(): Promise<"mongodb" | "memory"> {
   return isDbConfigured ? "mongodb" : "memory";
 }
+
+import mongoose from "mongoose";
+import { AGENT_SYSTEM_PROMPT_V1 } from "./agent";
+
+const SystemPromptModel = isDbConfigured 
+  ? (mongoose.models.SystemPrompt ?? mongoose.model("SystemPrompt", new mongoose.Schema({ _id: String, prompt: String })))
+  : null;
+
+let memoryPrompt: string | null = null;
+
+export async function getCurrentPrompt(): Promise<string> {
+  if (isDbConfigured) {
+    await getDb();
+    const doc = await SystemPromptModel!.findById("singleton").lean();
+    return (doc as any)?.prompt ?? AGENT_SYSTEM_PROMPT_V1;
+  }
+  return memoryPrompt ?? AGENT_SYSTEM_PROMPT_V1;
+}
+
+export async function setCurrentPrompt(prompt: string): Promise<void> {
+  if (isDbConfigured) {
+    await getDb();
+    await SystemPromptModel!.findByIdAndUpdate("singleton", { prompt }, { upsert: true });
+  } else {
+    memoryPrompt = prompt;
+  }
+}

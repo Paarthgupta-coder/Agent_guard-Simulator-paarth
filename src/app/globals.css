@@ -98,6 +98,29 @@ h1, h2, h3 {
   100% { opacity: 0; transform: translateX(30px); }
 }
 
+@keyframes streak-vertical {
+  0% { opacity: 0; transform: translateY(-100%); }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(100vh); }
+}
+
+@keyframes flow1 {
+  0% { top: 17%; left: 75%; transform: translate(-50%, -50%); opacity: 0; }
+  10% { opacity: 1; }
+  50% { top: 17%; left: 25%; transform: translate(-50%, -50%); }
+  90% { opacity: 1; }
+  100% { top: 50%; left: 25%; transform: translate(-50%, -50%); opacity: 0; }
+}
+
+@keyframes flow2 {
+  0% { top: 50%; left: 25%; transform: translate(-50%, -50%); opacity: 0; }
+  10% { opacity: 1; }
+  50% { top: 50%; left: 75%; transform: translate(-50%, -50%); }
+  90% { opacity: 1; }
+  100% { top: 83%; left: 75%; transform: translate(-50%, -50%); opacity: 0; }
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -114,3 +137,17 @@ h1, h2, h3 {
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

@@ -10,24 +10,25 @@ interface Props {
 
 export default function AgentSquadCard({ icon: Icon, name, quote, level, accent }: Props) {
   return (
-    <div className="glass rounded-2xl p-5 flex flex-col gap-4 hover:glow-mint hover:-translate-y-0.5 transition-all duration-200">
-      <div className="flex items-center justify-between">
+    <div className="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/10 rounded-[24px] p-6 flex flex-col gap-4 shadow-xl relative overflow-hidden group hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
+      <div className="absolute top-0 right-0 w-32 h-32 blur-[60px] pointer-events-none transition-opacity opacity-20 group-hover:opacity-60" style={{ background: accent }} />
+      <div className="flex items-center justify-between relative z-10">
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: `${accent}22`, color: accent }}
+          className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/5 transition-transform group-hover:scale-110"
+          style={{ background: `${accent}15`, color: accent }}
         >
-          <Icon size={20} />
+          <Icon size={22} />
         </div>
         <span
-          className="text-[11px] px-2 py-0.5 rounded-full border"
-          style={{ borderColor: `${accent}55`, color: accent }}
+          className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full border bg-black/50"
+          style={{ borderColor: `${accent}40`, color: accent }}
         >
           {level}
         </span>
       </div>
-      <div>
-        <div className="font-medium text-foreground">{name}</div>
-        <p className="text-sm text-muted mt-1 italic">&ldquo;{quote}&rdquo;</p>
+      <div className="relative z-10 pt-2">
+        <div className="font-semibold text-lg text-white mb-2">{name}</div>
+        <p className="text-[13px] leading-relaxed text-white/50">&ldquo;{quote}&rdquo;</p>
       </div>
     </div>
   );

@@ -17,11 +17,16 @@ export interface Persona {
   isCanary?: boolean;
 }
 
+export interface FlagReason {
+  category: FailureCategory;
+  reason: string;
+}
+
 export interface PersonaResult {
   persona: Persona;
   response: string;
   tokensUsed: number;
-  flags: FailureCategory[];
+  flags: FlagReason[];
   passed: boolean;
   mocked: boolean;
   extractedFact?: string;

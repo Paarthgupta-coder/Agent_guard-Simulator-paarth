@@ -37,8 +37,18 @@ export default function RunsPage() {
   }, [allResults, category, status, query]);
 
   return (
-    <div className="space-y-6">
-      <SectionHeader eyebrow="Module 05" title="Decision Feed" subtitle="Every synthetic-user transcript, flagged and scored." />
+    <div className="space-y-6 relative">
+      <div className="flex flex-col gap-2 relative z-10 mb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 w-fit mb-2">
+          <span className="text-xs font-mono text-white/70 uppercase tracking-widest">Module 05</span>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
+          Decision <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet to-amber">Ledger</span>
+        </h1>
+        <p className="text-white/50 text-sm max-w-xl leading-relaxed">
+          Every synthetic-user transcript, securely logged, flagged, and scored for complete traceability.
+        </p>
+      </div>
 
       {loading && <CardListSkeleton count={4} />}
 
@@ -99,7 +109,7 @@ export default function RunsPage() {
         </p>
       )}
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="flex flex-col gap-4">
         {filtered.map((r, i) => (
           <DecisionCard key={`${r.persona.id}-${i}`} result={r} index={i} />
         ))}

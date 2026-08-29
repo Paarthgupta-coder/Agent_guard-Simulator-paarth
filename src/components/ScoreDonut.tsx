@@ -17,7 +17,7 @@ export default function ScoreDonut({ label, value, color, sublabel, icon: Icon, 
   const offset = c - (Math.min(Math.max(value, 0), 100) / 100) * c;
 
   return (
-    <div className="glass rounded-2xl p-6 flex flex-col gap-3 rise-in">
+    <div className="flex flex-col gap-3 h-full justify-center">
       {(Icon || trend !== undefined) && (
         <div className="flex items-center justify-between">
           {Icon ? (

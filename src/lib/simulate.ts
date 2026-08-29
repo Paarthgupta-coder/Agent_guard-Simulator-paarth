@@ -1,33 +1,42 @@
-import { AGENT_SYSTEM_PROMPT_V1, applyPatch, patchForCategory } from "./agent";
+import { applyPatch, patchForCategory } from "./agent";
 import { callAgent } from "./llm";
 import { buildRunSet } from "./scenario";
 import { buildPersonaResult, computeScores, findRootCause } from "./evaluate";
-import { appendLog, updateRun } from "./store";
-import { PersonaResult } from "./types";
+import { appendLog, updateRun, getCurrentPrompt, setCurrentPrompt } from "./store";
+import { PersonaResult, Persona } from "./types";
 
 /**
  * Runs the full "1,000 Angry Users vs Your AI Agent" pipeline for one run id.
- * Deliberately awaited step by step (not all-parallel) so the live console /
- * run grid has a believable, watchable progression during a demo.
+ * Uses a concurrency pool to batch execution (Module 01 + 04 enhancement).
  */
 export async function runDemoPipeline(runId: string) {
   const personas = buildRunSet();
+  const currentPrompt = await getCurrentPrompt();
+  
   await updateRun(runId, { status: "chaos_input" });
-  await appendLog(runId, `Injecting ${personas.length} synthetic users (control, adversarial, canary repeats)...`, "info");
+  await appendLog(runId, `Injecting ${personas.length} synthetic users using a concurrency pool...`, "info");
 
-  // --- Module 01 + 04: Simulation Engine + Multi-Run Execution ---
+  // --- Module 01 + 04: Simulation Engine + Multi-Run Execution (Chunked Concurrency) ---
   const results: PersonaResult[] = [];
-  for (const persona of personas) {
-    const { text, tokensUsed, mocked } = await callAgent(AGENT_SYSTEM_PROMPT_V1, persona);
-    const result = buildPersonaResult(persona, text, tokensUsed, mocked);
-    results.push(result);
+  const CHUNK_SIZE = 6;
+  
+  for (let i = 0; i < personas.length; i += CHUNK_SIZE) {
+    const chunk = personas.slice(i, i + CHUNK_SIZE);
+    
+    await Promise.all(chunk.map(async (persona) => {
+      const { text, tokensUsed, mocked } = await callAgent(currentPrompt, persona);
+      const result = buildPersonaResult(persona, text, tokensUsed, mocked);
+      results.push(result);
+      
+      await appendLog(
+        runId,
+        `${persona.name} (${persona.mood}) → ${result.passed ? "OK" : `FLAGGED: ${result.flags.map(f => typeof f === 'string' ? f : f.category).join(", ")}`}`,
+        result.passed ? "info" : "warn"
+      );
+    }));
+    
     await updateRun(runId, { results: [...results] });
-    await appendLog(
-      runId,
-      `${persona.name} (${persona.mood}) → ${result.passed ? "OK" : `FLAGGED: ${result.flags.join(", ")}`}`,
-      result.passed ? "info" : "warn"
-    );
-    await sleep(70); // pacing for the live feed
+    await sleep(200); // pacing between chunks for the live feed
   }
 
   // --- Module 05: Evaluation Engine ---
@@ -51,31 +60,45 @@ export async function runDemoPipeline(runId: string) {
   if (rootCause) {
     await updateRun(runId, { status: "auto_improve" });
 
-    // Patch every distinct failure category seen this run, not just the
-    // majority one — the learning loop hardens the whole prompt in one pass.
     const toRerun = results.filter((r) => !r.passed);
-    const categoriesToPatch = [...new Set(toRerun.flatMap((r) => r.flags))];
-    let patchedPrompt = AGENT_SYSTEM_PROMPT_V1;
+    // Flatten flags, handling both old string format and new object format (if implemented next)
+    const categoriesToPatch = [...new Set(toRerun.flatMap((r) => r.flags.map(f => typeof f === 'string' ? f : f.category)))];
+    
+    let patchedPrompt = currentPrompt;
     const reasons: string[] = [];
+    
     for (const cat of categoriesToPatch) {
-      const patch = patchForCategory(cat);
+      const patch = patchForCategory(cat as any);
       patchedPrompt = applyPatch(patchedPrompt, patch);
       reasons.push(patch.reason);
     }
+    
     await updateRun(runId, { patchApplied: reasons.join(" ") });
     await appendLog(runId, `Auto-patch applied across ${categoriesToPatch.length} failure categories.`, "info");
+    
+    // Save the patched prompt so the NEXT run gets smarter (Module 06 fix)
+    await setCurrentPrompt(patchedPrompt);
+    await appendLog(runId, "Prompt baseline permanently hardened for future runs.", "success");
+
     const rerunResults: PersonaResult[] = [];
-    for (const failed of toRerun) {
-      const { text, tokensUsed, mocked } = await callAgent(patchedPrompt, failed.persona);
-      const result = buildPersonaResult(failed.persona, text, tokensUsed, mocked);
-      rerunResults.push(result);
+    
+    for (let i = 0; i < toRerun.length; i += CHUNK_SIZE) {
+      const chunk = toRerun.slice(i, i + CHUNK_SIZE);
+      
+      await Promise.all(chunk.map(async (failed) => {
+        const { text, tokensUsed, mocked } = await callAgent(patchedPrompt, failed.persona);
+        const result = buildPersonaResult(failed.persona, text, tokensUsed, mocked);
+        rerunResults.push(result);
+        
+        await appendLog(
+          runId,
+          `Re-run ${failed.persona.name} → ${result.passed ? "FIXED" : "still failing"}`,
+          result.passed ? "success" : "error"
+        );
+      }));
+      
       await updateRun(runId, { rerunResults: [...rerunResults] });
-      await appendLog(
-        runId,
-        `Re-run ${failed.persona.name} → ${result.passed ? "FIXED" : "still failing"}`,
-        result.passed ? "success" : "error"
-      );
-      await sleep(70);
+      await sleep(200);
     }
 
     const mergedResults = results.map((r) => {

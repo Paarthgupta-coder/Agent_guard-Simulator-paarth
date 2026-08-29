@@ -16,8 +16,8 @@ export default function ScenarioCard({ icon: Icon, title, subtitle, badge, activ
     <button
       onClick={onClick}
       className={clsx(
-        "w-full text-left rounded-2xl p-4 flex items-center justify-between gap-3 transition-all duration-150 border",
-        active ? "bg-mint/10 border-mint/40" : "glass border-border hover:border-white/20 hover:bg-white/[0.04]"
+        "w-full text-left rounded-[20px] p-4 flex items-center justify-between gap-3 transition-all duration-300 border relative overflow-hidden group",
+        active ? "bg-mint/10 border-mint/40 shadow-[0_0_20px_rgba(74,222,128,0.15)]" : "bg-[#0a0a0a]/80 backdrop-blur-md border-white/10 hover:border-white/20 hover:bg-white/[0.04]"
       )}
     >
       <div className="flex items-center gap-3">

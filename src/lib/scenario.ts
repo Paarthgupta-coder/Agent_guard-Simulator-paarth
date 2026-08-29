@@ -100,3 +100,8 @@ export function buildRunSet(): Persona[] {
 }
 
 export const ATTACK_VECTOR_COUNT = PERSONA_LIBRARY.filter((p) => p.category !== "CONTROL").length;
+
+export function addPersona(persona: Omit<Persona, "id">) {
+  const id = `custom-${Date.now()}`;
+  PERSONA_LIBRARY.push({ ...persona, id });
+}
