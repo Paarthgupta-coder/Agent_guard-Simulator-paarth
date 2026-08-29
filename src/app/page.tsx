@@ -69,13 +69,13 @@ export default function Home() {
                       </div>
                     </Link>
 
-                    <Link href="#" className="group/item flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors">
+                    <Link href="/download" className="group/item flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors">
                       <div className="w-28 h-20 rounded-xl bg-white/5 border border-white/10 overflow-hidden shrink-0">
                         <img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=400&auto=format&fit=crop" alt="Download" className="w-full h-full object-cover opacity-70 group-hover/item:opacity-100 group-hover/item:scale-105 transition-all duration-500" />
                       </div>
                       <div>
                         <div className="font-bold text-white text-[15px] mb-1 group-hover/item:text-mint transition-colors">Download App</div>
-                        <div className="text-[13px] text-white/50 leading-relaxed">Get the driver app</div>
+                        <div className="text-[13px] text-white/50 leading-relaxed">Get the desktop & mobile apps</div>
                       </div>
                     </Link>
 

@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MessageSquare, Bell, Moon, Radar, Database, Cpu } from "lucide-react";
+import { MessageSquare, Bell, Moon, Radar, Database, Cpu, PanelLeft } from "lucide-react";
 import clsx from "clsx";
 import Badge from "./ui/Badge";
+import { useSidebar } from "./SidebarProvider";
 
 const TABS = [
   { href: "/dashboard", label: "Home" },
@@ -22,6 +23,7 @@ interface Health {
 export default function Topbar() {
   const pathname = usePathname();
   const [health, setHealth] = useState<Health | null>(null);
+  const { toggle } = useSidebar();
 
   useEffect(() => {
     let cancelled = false;
@@ -38,8 +40,11 @@ export default function Topbar() {
     <div className="border-b border-border">
       <div className="px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-lg font-semibold">
-            Welcome, <span className="text-mint">Team Rocket</span>
+          <button onClick={toggle} className="p-2 hover:bg-white/5 rounded-lg text-white/50 hover:text-white transition-colors shrink-0">
+            <PanelLeft size={20} />
+          </button>
+          <span className="text-lg font-semibold ml-1">
+            Welcome <span className="text-white">User !</span>
           </span>
           {health && (
             <div className="hidden lg:flex items-center gap-2">
