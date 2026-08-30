@@ -152,7 +152,13 @@ export default function AgentsPage() {
           {run.patchApplied && (
             <div className="mt-4 pt-4 border-t border-rose/20">
               <div className="text-xs text-mint font-bold uppercase tracking-widest mb-1">Auto-Patch Deployed</div>
-              <p className="text-sm text-mint/80 font-mono bg-mint/5 p-3 rounded-lg border border-mint/10">{run.patchApplied}</p>
+              <p className="text-sm text-mint/80 font-mono bg-mint/5 p-3 rounded-lg border border-mint/10 mb-2">{run.patchApplied}</p>
+              {run.agentVersionAfter && run.agentVersionAfter !== run.agentVersionBefore && (
+                <div className="flex items-center gap-2 mt-3 text-mint">
+                  <div className="px-2 py-1 rounded bg-mint/10 border border-mint/20 text-xs font-bold tracking-widest uppercase">Agent Baseline Updated</div>
+                  <span className="text-sm font-mono opacity-80">v{run.agentVersionBefore} → v{run.agentVersionAfter}</span>
+                </div>
+              )}
             </div>
           )}
         </div>

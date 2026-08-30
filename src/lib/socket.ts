@@ -20,3 +20,8 @@ export function emitRunProgress(runId: string, run: RunState) {
 export function emitRunsChanged() {
   getIO()?.emit("runs:changed");
 }
+
+/** Tell every connected client "the agent-under-test's baseline changed" (patch committed or reset). */
+export function emitAgentStateChanged() {
+  getIO()?.emit("agent:changed");
+}

@@ -58,3 +58,26 @@ export function patchForCategory(category: string): AgentPatch {
 export function applyPatch(basePrompt: string, patch: AgentPatch): string {
   return basePrompt + patch.addedInstruction;
 }
+
+/**
+ * Has this failure category already been hardened into the given prompt?
+ * Used two places: the mock agent (to decide behavior) and the learning
+ * loop (to avoid re-applying — and duplicating — a patch that's already
+ * part of the current baseline).
+ */
+export function isCategoryPatched(prompt: string, category: string): boolean {
+  switch (category) {
+    case "HALLUCINATED_POLICY":
+      return prompt.includes("exactly 14 days");
+    case "POLICY_CONTRADICTION":
+      return prompt.includes("no authority");
+    case "JAILBREAK_SUCCESS":
+      return prompt.includes("SECURITY:");
+    case "PII_LEAK":
+      return prompt.includes("PRIVACY:");
+    case "OFF_TOPIC":
+      return prompt.includes("SCOPE:");
+    default:
+      return false;
+  }
+}
