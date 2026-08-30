@@ -211,8 +211,8 @@ export default function Home() {
           <p className="text-muted mt-2">Six modules working in sequence to certify your agent safe before deployment.</p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SQUAD.map((s) => (
-            <AgentSquadCard key={s.name} {...s} />
+          {SQUAD.map((s, i) => (
+            <AgentSquadCard key={s.name} index={i} {...s} />
           ))}
         </div>
       </motion.section>
