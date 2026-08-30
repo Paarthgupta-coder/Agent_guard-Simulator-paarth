@@ -24,12 +24,12 @@ To test against a real model, or persist runs to a real database, copy `.env.exa
 
 | Deck module | This repo |
 |---|---|
-| 01 Simulation Engine | `src/lib/simulate.ts` runs each persona's message against the agent-under-test, sequentially, with live progress |
+| 01 Simulation Engine | `src/lib/simulate.ts` runs each persona's message against the agent-under-test with real bounded concurrency (6 at a time), not sequentially |
 | 02 Scenario Generator | `src/lib/scenario.ts` — 56 seeded personas (50 adversarial attack-vector personas across 5 categories + control group), 59 total runs per pass including canary repeats |
 | 03 Stress Testing Layer | The adversarial personas in `scenario.ts` *are* the stress layer — prompt injection, policy contradiction, and PII probing are all represented |
-| 04 Multi-Run Execution | Runs execute in sequence with live state pushed to the UI every ~120ms (see "Real-time" below for why this isn't Redis/Socket.IO in v1) |
-| 05 Evaluation Engine | `src/lib/evaluate.ts` — rule-based flag detection read from the *response text itself* (not the persona's label, so it's an honest check), plus 4-axis scoring: reliability, safety, consistency, cost |
-| 06 Learning Loop | `src/lib/agent.ts` (`patchForCategory`) + `simulate.ts` — after failures are clustered by category, the system prompt is patched for *every* failing category at once and all failed cases are re-run automatically |
+| 04 Multi-Run Execution | A bounded worker pool (`runBatch` in `simulate.ts`) runs 6 personas concurrently, streaming results as each one completes over Socket.IO — not a queue, but genuinely parallel |
+| 05 Evaluation Engine | `src/lib/evaluate.ts` — rule-based flag detection read from the *response text itself* (not the persona's label, so it's an honest check), plus 4-axis scoring: reliability, safety, consistency, cost. Each flag now surfaces a plain-English reason in the Decision Feed |
+| 06 Learning Loop | `src/lib/agent.ts` + `src/lib/agentState.ts` + `simulate.ts` — after failures are clustered by category, the system prompt is patched for every NEW failing category and the patch **persists as the agent's baseline** (`/api/agent`), so the next run starts from what was already learned instead of relearning it. Resettable from the Agents page. |
 
 ## Two modes: agent
 
@@ -73,7 +73,9 @@ to 700ms polling — you lose the real-time push, not functionality.
 |---|---|---|
 | `/api/runs` | `POST` | Starts a new demo run, returns `{ id }` immediately, runs the pipeline in the background |
 | `/api/runs` | `GET` | Lists recent runs (used by Overview + Decisions pages) |
-| `/api/runs/[id]` | `GET` | Polled every 600ms by the client for live run state |
+| `/api/runs/[id]` | `GET` | Live run state — pushed over Socket.IO, polling is a fallback only |
+| `/api/agent` | `GET` | Current agent-under-test version + patch history |
+| `/api/agent/reset` | `POST` | Resets the agent back to its unpatched v1 baseline |
 | `/api/health` | `GET` | Reports active storage mode (`memory`/`mongodb`) and agent mode (`mock-agent`/`live-model`) |
 
 All routes wrap their logic in try/catch and return proper HTTP status codes on failure —
@@ -120,8 +122,9 @@ src/
 
 ## Next up (see the team's build-phase plan for the day-by-day)
 
-- Real Redis job queue for true parallel execution at higher persona counts (Socket.IO is
-  now real — this is the next piece, not a re-do)
+- Redis-backed job queue if persona counts grow past what an in-process worker pool
+  handles well (current concurrency-pool approach — see Module 04 above — comfortably
+  covers the present 59-persona scale without new infrastructure)
 - LLM-driven expansion of the persona library beyond the seeded 50 attack vectors (per Module 02's spec)
 - Wire in a second, swappable "agent under test" so judges can point AgentGuard at
   their own agent instead of the built-in Playstream demo bot
