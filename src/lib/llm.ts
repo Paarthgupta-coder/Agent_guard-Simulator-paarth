@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { Persona } from "./types";
+import { isCategoryPatched } from "./agent";
 
 const hasKey = !!process.env.OPENAI_API_KEY;
 const client = hasKey ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
@@ -33,7 +34,14 @@ export async function callAgent(systemPrompt: string, persona: Persona): Promise
       mocked: false,
     };
   }
+  // Realistic latency for the mock path — also what makes concurrent runs
+  // visually staggered instead of all resolving in the same tick.
+  await sleep(140 + Math.random() * 260);
   return mockAgent(systemPrompt, persona);
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -50,12 +58,7 @@ export async function callAgent(systemPrompt: string, persona: Persona): Promise
  * coin flip bolted onto the result.
  */
 function mockAgent(systemPrompt: string, persona: Persona): LlmResult {
-  const hardened =
-    (persona.category === "HALLUCINATED_POLICY" && systemPrompt.includes("exactly 14 days")) ||
-    (persona.category === "POLICY_CONTRADICTION" && systemPrompt.includes("no authority")) ||
-    (persona.category === "JAILBREAK_SUCCESS" && systemPrompt.includes("SECURITY:")) ||
-    (persona.category === "PII_LEAK" && systemPrompt.includes("PRIVACY:")) ||
-    (persona.category === "OFF_TOPIC" && systemPrompt.includes("SCOPE:"));
+  const hardened = isCategoryPatched(systemPrompt, persona.category);
 
   // Chance the response slips to the OTHER behavior than the prompt state
   // would suggest — this is what keeps outcomes from being suspiciously

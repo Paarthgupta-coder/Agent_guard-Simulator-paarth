@@ -14,13 +14,29 @@ import { emitRunProgress, emitRunsChanged } from "./socket";
  */
 
 declare global {
-  // eslint-disable-next-line no-var
   var __agentguardRuns: Map<string, RunState> | undefined;
 }
 const memory: Map<string, RunState> = global.__agentguardRuns ?? new Map();
 global.__agentguardRuns = memory;
 
-function toRunState(doc: any): RunState {
+/** Shape of a run document as it comes back from Mongoose's `.lean()` — `_id` instead of `id`, everything else optional until read. */
+interface RunDoc {
+  _id: string;
+  status: RunState["status"];
+  createdAt: number;
+  log?: LogLine[];
+  results?: RunState["results"];
+  rerunResults?: RunState["rerunResults"];
+  rootCause?: RunState["rootCause"];
+  patchApplied?: string;
+  scoresBefore?: RunState["scoresBefore"];
+  scoresAfter?: RunState["scoresAfter"];
+  totalPersonas: number;
+  agentVersionBefore?: number;
+  agentVersionAfter?: number;
+}
+
+function toRunState(doc: RunDoc): RunState {
   return {
     id: doc._id,
     status: doc.status,
@@ -33,6 +49,8 @@ function toRunState(doc: any): RunState {
     scoresBefore: doc.scoresBefore ?? undefined,
     scoresAfter: doc.scoresAfter ?? undefined,
     totalPersonas: doc.totalPersonas,
+    agentVersionBefore: doc.agentVersionBefore,
+    agentVersionAfter: doc.agentVersionAfter,
   };
 }
 
@@ -61,7 +79,7 @@ export async function createRun(id: string, totalPersonas: number): Promise<RunS
 export async function getRun(id: string): Promise<RunState | undefined> {
   if (isDbConfigured) {
     await getDb();
-    const doc = await RunModel.findById(id).lean();
+    const doc = await RunModel.findById(id).lean<RunDoc>();
     return doc ? toRunState(doc) : undefined;
   }
   return memory.get(id);
@@ -70,7 +88,7 @@ export async function getRun(id: string): Promise<RunState | undefined> {
 export async function listRuns(limit = 20): Promise<RunState[]> {
   if (isDbConfigured) {
     await getDb();
-    const docs = await RunModel.find().sort({ createdAt: -1 }).limit(limit).lean();
+    const docs = await RunModel.find().sort({ createdAt: -1 }).limit(limit).lean<RunDoc[]>();
     return docs.map(toRunState);
   }
   return [...memory.values()].sort((a, b) => b.createdAt - a.createdAt).slice(0, limit);
@@ -106,31 +124,4 @@ export async function appendLog(id: string, text: string, level: LogLine["level"
 
 export async function storeMode(): Promise<"mongodb" | "memory"> {
   return isDbConfigured ? "mongodb" : "memory";
-}
-
-import mongoose from "mongoose";
-import { AGENT_SYSTEM_PROMPT_V1 } from "./agent";
-
-const SystemPromptModel = isDbConfigured 
-  ? (mongoose.models.SystemPrompt ?? mongoose.model("SystemPrompt", new mongoose.Schema({ _id: String, prompt: String })))
-  : null;
-
-let memoryPrompt: string | null = null;
-
-export async function getCurrentPrompt(): Promise<string> {
-  if (isDbConfigured) {
-    await getDb();
-    const doc = await SystemPromptModel!.findById("singleton").lean();
-    return (doc as any)?.prompt ?? AGENT_SYSTEM_PROMPT_V1;
-  }
-  return memoryPrompt ?? AGENT_SYSTEM_PROMPT_V1;
-}
-
-export async function setCurrentPrompt(prompt: string): Promise<void> {
-  if (isDbConfigured) {
-    await getDb();
-    await SystemPromptModel!.findByIdAndUpdate("singleton", { prompt }, { upsert: true });
-  } else {
-    memoryPrompt = prompt;
-  }
 }

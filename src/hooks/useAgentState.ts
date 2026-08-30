@@ -18,20 +18,23 @@ function getSocket(): Socket {
 export function useAgentState() {
   const [state, setState] = useState<AgentStateView | null>(null);
 
-  async function refresh() {
-    const res = await fetch("/api/agent");
-    if (res.ok) setState(await res.json());
-  }
-
   useEffect(() => {
-    refresh();
+    let cancelled = false;
+    async function load() {
+      const res = await fetch("/api/agent");
+      if (res.ok && !cancelled) setState(await res.json());
+    }
+    load();
+
     const socket = getSocket();
-    socket.on("agent:changed", refresh);
-    socket.on("connect", refresh);
-    const interval = setInterval(refresh, 5000);
+    socket.on("agent:changed", load);
+    socket.on("connect", load);
+    const interval = setInterval(load, 5000);
+
     return () => {
-      socket.off("agent:changed", refresh);
-      socket.off("connect", refresh);
+      cancelled = true;
+      socket.off("agent:changed", load);
+      socket.off("connect", load);
       clearInterval(interval);
     };
   }, []);
@@ -41,5 +44,5 @@ export function useAgentState() {
     if (res.ok) setState(await res.json());
   }
 
-  return { state, reset, refresh };
+  return { state, reset };
 }
